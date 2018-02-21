@@ -189,28 +189,28 @@ server.put("/friends/:id", (req, res) => {
   }
 });
 
-server.put("/friends/:id", (req, res) => {
+server.put("/posts/:id", (req, res) => {
     const { id } = req.params;
-    const { firstName, lastName, age } = req.body;
-    if (firstName && lastName && age) {
-      Friend.findByIdAndUpdate(id, req.body)
-        .then(updatedFriend => {
-          if (updatedFriend) {
-            res.status(201).json(updatedFriend);
+    const { postTitle, postContent } = req.body;
+    if (postTitle && postContent) {
+      Post.findByIdAndUpdate(id, req.body)
+        .then(updatedPost => {
+          if (updatedPost) {
+            res.status(201).json(updatedPost);
           } else {
             res
               .status(404)
-              .json({ errorMessage: `No friend with the id ${id} exists` });
+              .json({ errorMessage: `No Post with the id ${id} exists` });
           }
         })
         .catch(error => {
           res.status(500).json({
-            errorMessage: "There has been an error updating this Friend"
+            errorMessage: "There has been an error updating this Post"
           });
         });
     } else {
       res.status(500).json({
-        errorMessage: "Please provide a first name, last name, and age"
+        errorMessage: "Please provide Post Title and Content"
       });
     }
   });
