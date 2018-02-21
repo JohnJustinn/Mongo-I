@@ -7,7 +7,7 @@ const helmet = require("helmet");
 const server = express();
 
 const Friend = require("./FriendModel.js");
-const Post = require("./PostModel.js")
+const Post = require("./PostModel.js");
 
 server.use(bodyParser.json());
 server.use(cors());
@@ -45,6 +45,28 @@ server.post("/friends", (req, res) => {
   }
 });
 
+server.post("/posts", (req, res) => {
+  const blogPost = req.body;
+  const { postTitle, postContent } = blogPost;
+  const post = new Post(blogPost);
+  if (postTitle && postContent) {
+    post
+      .save()
+      .then(savedPost => {
+        res.status(201).json(savedPost);
+      })
+      .catch(error => {
+        res.status(500).json({
+          errorMessage: "There was an error saving the post to the database"
+        });
+      });
+  } else {
+    res.status(404).json({
+      errorMessage: "Please provide a post title and some content"
+    });
+  }
+});
+
 server.get("/friends", (req, res) => {
   Friend.find()
     .then(friends => {
@@ -56,6 +78,18 @@ server.get("/friends", (req, res) => {
         .json({ errorMessage: "The information could not be retrieved" });
     });
 });
+
+server.get("/posts", (req, res) => {
+    Post.find()
+      .then(posts => {
+        res.status(200).json(posts);
+      })
+      .catch(error => {
+        res
+          .status(500)
+          .json({ errorMessage: "The Post list could not be retrieved" });
+      });
+  });
 
 server.get("/friends/:id", (req, res) => {
   const { id } = req.params;
@@ -75,6 +109,25 @@ server.get("/friends/:id", (req, res) => {
         .json({ errorMessage: `The information could not be retrieved` });
     });
 });
+
+server.get("/posts/:id", (req, res) => {
+    const { id } = req.params;
+    Post.findById(id)
+      .then(post => {
+        if (post) {
+          res.status(200).json(post);
+        } else {
+          res.status(404).json({
+            errormessage: "The post with the specified ID does not exist"
+          });
+        }
+      })
+      .catch(error => {
+        res
+          .status(500)
+          .json({ errorMessage: `The Post information could not be retrieved` });
+      });
+  });
 
 server.delete("/friends/:id", (req, res) => {
   const { id } = req.params;
@@ -108,18 +161,14 @@ server.put("/friends/:id", (req, res) => {
         }
       })
       .catch(error => {
-        res
-          .status(500)
-          .json({
-            errorMessage: "There has been an error updating this Friend"
-          });
+        res.status(500).json({
+          errorMessage: "There has been an error updating this Friend"
+        });
       });
   } else {
-    res
-      .status(500)
-      .json({
-        errorMessage: "Please provide a first name, last name, and age"
-      });
+    res.status(500).json({
+      errorMessage: "Please provide a first name, last name, and age"
+    });
   }
 });
 
