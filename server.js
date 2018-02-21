@@ -7,6 +7,7 @@ const helmet = require("helmet");
 const server = express();
 
 const Friend = require("./FriendModel.js");
+const Post = require("./PostModel.js")
 
 server.use(bodyParser.json());
 server.use(cors());
