@@ -134,7 +134,7 @@ server.delete("/friends/:id", (req, res) => {
   Friend.findByIdAndRemove(id)
     .then(friend => {
       if (friend) {
-        res.status(200).json({ message: "Friend has been deleted" });
+        res.status(201).json({ message: "Friend has been deleted" });
       } else {
         res.status(404).json({
           errorMessage: "The friend with the specified id does not exist"
@@ -142,9 +142,26 @@ server.delete("/friends/:id", (req, res) => {
       }
     })
     .catch(error => {
-      res.status(400).json({ errorMessage: `The friend could not be removed` });
+      res.status(500).json({ errorMessage: `The friend could not be removed` });
     });
 });
+
+server.delete("/posts/:id", (req, res) => {
+    const { id } = req.params;
+    Post.findByIdAndRemove(id)
+      .then(post => {
+        if (post) {
+          res.status(201).json({ message: "Post has been deleted" });
+        } else {
+          res.status(404).json({
+            errorMessage: "The Post with the specified id does not exist"
+          });
+        }
+      })
+      .catch(error => {
+        res.status(500).json({ errorMessage: `The Post could not be removed` });
+      });
+  });
 
 server.put("/friends/:id", (req, res) => {
   const { id } = req.params;
@@ -171,6 +188,32 @@ server.put("/friends/:id", (req, res) => {
     });
   }
 });
+
+server.put("/friends/:id", (req, res) => {
+    const { id } = req.params;
+    const { firstName, lastName, age } = req.body;
+    if (firstName && lastName && age) {
+      Friend.findByIdAndUpdate(id, req.body)
+        .then(updatedFriend => {
+          if (updatedFriend) {
+            res.status(201).json(updatedFriend);
+          } else {
+            res
+              .status(404)
+              .json({ errorMessage: `No friend with the id ${id} exists` });
+          }
+        })
+        .catch(error => {
+          res.status(500).json({
+            errorMessage: "There has been an error updating this Friend"
+          });
+        });
+    } else {
+      res.status(500).json({
+        errorMessage: "Please provide a first name, last name, and age"
+      });
+    }
+  });
 
 mongoose
   .connect("mongodb://localhost/FriendList")
