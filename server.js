@@ -63,11 +63,9 @@ server.get("/friends/:id", (req, res) => {
       if (friend) {
         res.status(200).json(friend);
       } else {
-        res
-          .status(404)
-          .json({
-            errormessage: "The friend with the specified ID does not exist"
-          });
+        res.status(404).json({
+          errormessage: "The friend with the specified ID does not exist"
+        });
       }
     })
     .catch(error => {
@@ -84,32 +82,44 @@ server.delete("/friends/:id", (req, res) => {
       if (friend) {
         res.status(200).json({ message: "Friend has been deleted" });
       } else {
-        res
-          .status(404)
-          .json({
-            errorMessage: "The friend with the specified id does not exist"
-          });
+        res.status(404).json({
+          errorMessage: "The friend with the specified id does not exist"
+        });
       }
     })
     .catch(error => {
-      res
-        .status(400)
-        .json({ errorMessage: `The friend could not be removed` });
+      res.status(400).json({ errorMessage: `The friend could not be removed` });
     });
 });
 
 server.put("/friends/:id", (req, res) => {
-  const friendInfo = req.body;
   const { id } = req.params;
-  Friend.findByIdAndUpdate(id, friendInfo)
-    .then(update => {
-      res.status(200).json(update);
-    })
-    .catch(error => {
-      res
-        .status(400)
-        .json({ errorMessage: "User cannot be accessed by this id" });
-    });
+  const { firstName, lastName, age } = req.body;
+  if (firstName && lastName && age) {
+    Friend.findByIdAndUpdate(id, req.body)
+      .then(updatedFriend => {
+        if (updatedFriend) {
+          res.status(201).json(updatedFriend);
+        } else {
+          res
+            .status(404)
+            .json({ errorMessage: `No friend with the id ${id} exists` });
+        }
+      })
+      .catch(error => {
+        res
+          .status(500)
+          .json({
+            errorMessage: "There has been an error updating this Friend"
+          });
+      });
+  } else {
+    res
+      .status(500)
+      .json({
+        errorMessage: "Please provide a first name, last name, and age"
+      });
+  }
 });
 
 mongoose
